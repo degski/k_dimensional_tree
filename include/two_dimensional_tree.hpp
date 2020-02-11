@@ -43,7 +43,7 @@ struct point2 {
 
     value_type x, y;
 
-    point2 ( ) noexcept : x ( std::numeric_limits<Type>::quiet_NaN ( ) ) {}
+    constexpr point2 ( ) noexcept : x ( std::numeric_limits<Type>::quiet_NaN ( ) ) {}
     point2 ( point2 const & ) noexcept = default;
     point2 ( point2 && ) noexcept      = default;
     point2 ( value_type && x_ ) noexcept : x{ std::move ( x_ ) } {} // to set the empty-sentinel-value.
@@ -221,7 +221,7 @@ struct two_dimensional_tree {
         auto const n = std::distance ( first_, last_ );
         if ( n ) {
             if ( n > detail::linear_bound ) {
-                m_data.resize ( capacity ( static_cast<std::size_t> ( n ) );
+                m_data.resize ( capacity ( static_cast<std::size_t> ( n ) ) );
                 m_leaf_start = detail::median_ptr ( m_data.data ( ), m_data.size ( ) );
                 switch ( get_dimensions_order ( first_, last_ ) ) {
                     case 0:

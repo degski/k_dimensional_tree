@@ -43,7 +43,7 @@ struct point1 {
 
     value_type x, y;
 
-    point1 ( ) noexcept : x ( std::numeric_limits<Type>::quiet_NaN ( ) ) {}
+    constexpr point1 ( ) noexcept : x ( std::numeric_limits<Type>::quiet_NaN ( ) ) {}
     point1 ( point1 const & ) noexcept = default;
     point1 ( point1 && ) noexcept      = default;
     point1 ( value_type && x_ ) noexcept : x{ std::move ( x_ ) } {}
@@ -177,7 +177,7 @@ struct one_dimensional_tree {
         auto const n = std::distance ( first_, last_ );
         if ( n ) {
             if ( n > detail::linear_bound ) {
-                m_data.resize ( capacity ( static_cast<std::size_t> ( n ) );
+                m_data.resize ( capacity ( static_cast<std::size_t> ( n ) ) );
                 m_leaf_start = detail::median_ptr ( m_data.data ( ), m_data.size ( ) );
                 kd_construct_x ( m_data.data ( ), first_, last_ );
                 nn_search = &one_dimensional_tree::nn_search_x;
