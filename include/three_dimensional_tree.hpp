@@ -49,9 +49,6 @@ struct point3 {
     point3 ( value_type && x_, value_type && y_, value_type && z_ ) noexcept :
         x{ std::move ( x_ ) }, y{ std::move ( y_ ) }, z{ std::move ( z_ ) } {}
 
-    //  template<typename SfmlVec>
-    //  point3 ( SfmlVec && v_ ) noexcept : x{ std::move ( v_.x ) }, y{ std::move ( v_.y ) }, z{ std::move ( v_.z ) } {}
-
     [[maybe_unused]] point3 & operator= ( point3 const & ) noexcept = default;
     [[maybe_unused]] point3 & operator= ( point3 && ) noexcept = default;
 

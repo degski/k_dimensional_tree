@@ -48,9 +48,6 @@ struct point2 {
     point2 ( point2 && ) noexcept      = default;
     point2 ( value_type && x_, value_type && y_ ) noexcept : x{ std::move ( x_ ) }, y{ std::move ( y_ ) } {}
 
-    // template<typename SfmlVec>
-    // point2 ( SfmlVec && v_ ) noexcept : x{ std::move ( v_.x ) }, y{ std::move ( v_.y ) } {}
-
     [[maybe_unused]] point2 & operator= ( point2 const & ) noexcept = default;
     [[maybe_unused]] point2 & operator= ( point2 && ) noexcept = default;
 
