@@ -41,6 +41,7 @@
 
 #include <sax/splitmix.hpp>
 
+#include "one_dimensional_tree.hpp"
 #include "three_dimensional_tree.hpp"
 #include "two_dimensional_tree.hpp"
 

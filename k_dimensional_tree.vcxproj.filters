@@ -29,5 +29,8 @@
     <ClInclude Include="include\detail\kdt.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\one_dimensional_tree.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

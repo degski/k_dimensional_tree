@@ -46,7 +46,7 @@ struct point3 {
     point3 ( ) noexcept                = default;
     point3 ( point3 const & ) noexcept = default;
     point3 ( point3 && ) noexcept      = default;
-    point3 ( value_type && x_ ) noexcept : x{ std::move ( x_ ) } {} // to set the empty sentinel value
+    point3 ( value_type && x_ ) noexcept : x{ std::move ( x_ ) } {} // to set the empty-sentinel-value.
     point3 ( value_type && x_, value_type && y_, value_type && z_ ) noexcept :
         x{ std::move ( x_ ) }, y{ std::move ( y_ ) }, z{ std::move ( z_ ) } {}
 
@@ -68,6 +68,8 @@ struct point3 {
         z -= p_.z;
         return *this;
     }
+
+    // For debugging.
 
     template<typename Stream>
     [[maybe_unused]] friend Stream & operator<< ( Stream & out_, point3 const & p_ ) noexcept {
@@ -518,6 +520,8 @@ struct three_dimensional_tree {
         return ( ( p1_.x - p2_.x ) * ( p1_.x - p2_.x ) ) +
                ( ( p1_.y - p2_.y ) * ( p1_.y - p2_.y ) + ( ( p1_.z - p2_.z ) * ( p1_.z - p2_.z ) ) );
     }
+
+    // For debugging.
 
     template<typename Stream>
     [[maybe_unused]] friend Stream & operator<< ( Stream & out_, three_dimensional_tree const & tree_ ) noexcept {

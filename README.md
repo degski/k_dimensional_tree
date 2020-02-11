@@ -1,6 +1,6 @@
 # k_dimensional_tree
 
-Fast KD-Tree (a recursive Implementation with fallback to linear search in case of a small number of points) in 2 or 3 dimensions.
+Fast KD-Tree (a recursive Implementation with fallback to linear search in case of a small number of points) in 1, 2 or 3 dimensions.
 
 The implementation uses recursion for both construction and nn-search and is strictly C++20 (and up).
 
@@ -17,9 +17,9 @@ The implementation uses recursion for both construction and nn-search and is str
     struct two_dimensional_tree;
 
 
-A `sax::point2` and `sax::point3 class` are provided, or just drop in **SFML**'s `sf::Vector2` or `sf::Vector3`. The parameter `StdArraySize` has no effect in case of a `std::vector`, which is the default container type.
+A `sax::point1`, `sax::point2` and `sax::point3 class` are provided, or just drop in **SFML**'s `sf::Vector2` or `sf::Vector3`. The parameter `StdArraySize` has no effect in case of a `std::vector`, which is the default container type.
 
-No map is implemented, but one can return an index of the node that's closest. Simply make lookup-tables for any "mapped" data.
+No map is implemented, but one can return an index of the node that's closest, enabling flexible lookup-tables for any 'mapped' data, while keeping the data structure as compact as possible.
 
 ### IDEAS:
 

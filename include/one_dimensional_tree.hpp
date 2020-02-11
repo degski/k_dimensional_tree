@@ -1,7 +1,7 @@
 
 // MIT License
 //
-// Copyright (c) 2018, 2019, 2020 degski
+// Copyright (c) 2020 degski
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -37,53 +37,50 @@
 namespace sax {
 
 template<typename Type>
-struct point2 {
+struct point1 {
 
     using value_type = Type;
 
     value_type x, y;
 
-    point2 ( ) noexcept                = default;
-    point2 ( point2 const & ) noexcept = default;
-    point2 ( point2 && ) noexcept      = default;
-    point2 ( value_type && x_ ) noexcept : x{ std::move ( x_ ) } {} // to set the empty-sentinel-value.
-    point2 ( value_type && x_, value_type && y_ ) noexcept : x{ std::move ( x_ ) }, y{ std::move ( y_ ) } {}
+    point1 ( ) noexcept                = default;
+    point1 ( point1 const & ) noexcept = default;
+    point1 ( point1 && ) noexcept      = default;
+    point1 ( value_type && x_ ) noexcept : x{ std::move ( x_ ) } {}
 
-    [[maybe_unused]] point2 & operator= ( point2 const & ) noexcept = default;
-    [[maybe_unused]] point2 & operator= ( point2 && ) noexcept = default;
+    [[maybe_unused]] point1 & operator= ( point1 const & ) noexcept = default;
+    [[maybe_unused]] point1 & operator= ( point1 && ) noexcept = default;
 
-    [[nodiscard]] bool operator== ( point2 const & p_ ) const noexcept { return x == p_.x and y == p_.y; }
-    [[nodiscard]] bool operator!= ( point2 const & p_ ) const noexcept { not operator== ( p_ ); }
+    [[nodiscard]] bool operator== ( point1 const & p_ ) const noexcept { return x == p_.x; }
+    [[nodiscard]] bool operator!= ( point1 const & p_ ) const noexcept { not operator== ( p_ ); }
 
-    [[maybe_unused]] point2 & operator+= ( point2 const & p_ ) noexcept {
+    [[maybe_unused]] point1 & operator+= ( point1 const & p_ ) noexcept {
         x += p_.x;
-        y += p_.y;
         return *this;
     }
-    [[maybe_unused]] point2 & operator-= ( point2 const & p_ ) noexcept {
+    [[maybe_unused]] point1 & operator-= ( point1 const & p_ ) noexcept {
         x -= p_.x;
-        y -= p_.y;
         return *this;
     }
 
     // For debugging.
 
     template<typename Stream>
-    [[maybe_unused]] friend Stream & operator<< ( Stream & out_, point2 const & p_ ) noexcept {
+    [[maybe_unused]] friend Stream & operator<< ( Stream & out_, point1 const & p_ ) noexcept {
         if ( not std::isnan ( p_.x ) )
-            out_ << '<' << p_.x << ' ' << p_.y << '>';
+            out_ << '<' << p_.x << '>';
         else
-            out_ << "<* *>";
+            out_ << "<*>";
         return out_;
     }
 };
 
-using point2f = point2<float>;
-using point2d = point2<double>;
+using point1f = point1<float>;
+using point1d = point1<double>;
 
 // Implicit KD full binary tree of dimension 2.
-template<typename Type, typename Point = point2<Type>, typename TagType = vector_tag, std::size_t StdArraySize = 0>
-struct two_dimensional_tree {
+template<typename Type, typename Point = point1<Type>, typename TagType = vector_tag, std::size_t StdArraySize = 0>
+struct one_dimensional_tree {
 
     using value_type = Point;
     using base_type  = Type;
@@ -102,15 +99,6 @@ struct two_dimensional_tree {
     using const_iterator = typename container::const_iterator;
 
     private:
-    template<typename ForwardIt>
-    [[nodiscard]] std::size_t get_dimensions_order ( ForwardIt const first_, ForwardIt const last_ ) const noexcept {
-        auto const [ min_x, max_x ] =
-            std::minmax_element ( first_, last_, [] ( auto const & a, auto const & b ) { return a.x < b.x; } );
-        auto const [ min_y, max_y ] =
-            std::minmax_element ( first_, last_, [] ( auto const & a, auto const & b ) { return a.y < b.y; } );
-        return ( max_x->x - min_x->x ) < ( max_y->y - min_y->y );
-    }
-
     [[nodiscard]] pointer left ( pointer const p_ ) const noexcept { return ( p_ + 1 ) + ( p_ - m_data.data ( ) ); }
     [[nodiscard]] pointer right ( pointer const p_ ) const noexcept { return ( p_ + 2 ) + ( p_ - m_data.data ( ) ); }
     [[nodiscard]] const_pointer left ( const_pointer const p_ ) const noexcept { return ( p_ + 1 ) + ( p_ - m_data.data ( ) ); }
@@ -121,30 +109,19 @@ struct two_dimensional_tree {
     }
 
     template<typename RandomIt>
-    void kd_construct_xy ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
+    void kd_construct_x ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
         RandomIt median = detail::median_it ( first_, last_ );
         std::nth_element ( first_, median, last_, [] ( value_type const & a, value_type const & b ) { return a.x < b.x; } );
         *p_ = *median;
         if ( first_ != median ) {
-            kd_construct_yx ( left ( p_ ), first_, median );
+            kd_construct_x ( left ( p_ ), first_, median );
             if ( ++median != last_ )
-                kd_construct_yx ( right ( p_ ), median, last_ );
-        }
-    }
-    template<typename RandomIt>
-    void kd_construct_yx ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt median = detail::median_it ( first_, last_ );
-        std::nth_element ( first_, median, last_, [] ( value_type const & a, value_type const & b ) { return a.y < b.y; } );
-        *p_ = *median;
-        if ( first_ != median ) {
-            kd_construct_xy ( left ( p_ ), first_, median );
-            if ( ++median != last_ )
-                kd_construct_xy ( right ( p_ ), median, last_ );
+                kd_construct_x ( right ( p_ ), median, last_ );
         }
     }
 
-    void nn_search_xy ( const_pointer const p_ ) const noexcept {
-        dist_type d = two_dimensional_tree::distance_squared ( *p_, m_to );
+    void nn_search_x ( const_pointer const p_ ) const noexcept {
+        dist_type d = one_dimensional_tree::distance_squared ( *p_, m_to );
         if ( d < m_min_distance_squared ) {
             m_min_distance_squared = d;
             m_point                = p_;
@@ -152,33 +129,14 @@ struct two_dimensional_tree {
         if ( is_leaf ( p_ ) )
             return;
         if ( ( d = p_->x - m_to.x ) > dist_type{ 0 } ) {
-            nn_search_yx ( left ( p_ ) );
+            nn_search_x ( left ( p_ ) );
             if ( ( ( d * d ) < m_min_distance_squared ) )
-                nn_search_yx ( right ( p_ ) );
+                nn_search_x ( right ( p_ ) );
         }
         else {
-            nn_search_yx ( right ( p_ ) );
+            nn_search_x ( right ( p_ ) );
             if ( ( ( d * d ) < m_min_distance_squared ) )
-                nn_search_yx ( left ( p_ ) );
-        }
-    }
-    void nn_search_yx ( const_pointer const p_ ) const noexcept {
-        dist_type d = two_dimensional_tree::distance_squared ( *p_, m_to );
-        if ( d < m_min_distance_squared ) {
-            m_min_distance_squared = d;
-            m_point                = p_;
-        }
-        if ( is_leaf ( p_ ) )
-            return;
-        if ( ( d = p_->y - m_to.y ) > dist_type{ 0 } ) {
-            nn_search_xy ( left ( p_ ) );
-            if ( ( ( d * d ) < m_min_distance_squared ) )
-                nn_search_xy ( right ( p_ ) );
-        }
-        else {
-            nn_search_xy ( right ( p_ ) );
-            if ( ( ( d * d ) < m_min_distance_squared ) )
-                nn_search_xy ( left ( p_ ) );
+                nn_search_x ( left ( p_ ) );
         }
     }
 
@@ -194,7 +152,7 @@ struct two_dimensional_tree {
 
     container m_data;
     const_pointer m_leaf_start = nullptr;
-    void ( two_dimensional_tree::*nn_search ) ( const_pointer const ) const noexcept;
+    void ( one_dimensional_tree::*nn_search ) ( const_pointer const ) const noexcept;
 
     // These mutable types are class global result types.
     mutable const_pointer m_point = nullptr;
@@ -202,12 +160,12 @@ struct two_dimensional_tree {
     mutable dist_type m_min_distance_squared = std::numeric_limits<dist_type>::max ( );
 
     public:
-    two_dimensional_tree ( ) noexcept {}
-    two_dimensional_tree ( two_dimensional_tree const & ) = delete;
-    two_dimensional_tree ( two_dimensional_tree && rhs_ ) noexcept :
+    one_dimensional_tree ( ) noexcept {}
+    one_dimensional_tree ( one_dimensional_tree const & ) = delete;
+    one_dimensional_tree ( one_dimensional_tree && rhs_ ) noexcept :
         m_data{ std::move ( rhs_.m_data ) }, m_leaf_start{ rhs_.m_leaf_start }, nn_search{ rhs_.nn_search } {}
 
-    two_dimensional_tree ( std::initializer_list<value_type> il_ ) noexcept {
+    one_dimensional_tree ( std::initializer_list<value_type> il_ ) noexcept {
         if constexpr ( std::is_same_v<container_type, array_tag> )
             assert ( il_.size ( ) == StdArraySize );
         if ( il_.size ( ) ) {
@@ -220,16 +178,8 @@ struct two_dimensional_tree {
                 container points;
                 points.reserve ( il_.size ( ) );
                 std::copy ( std::begin ( il_ ), std::end ( il_ ), std::back_inserter ( points ) );
-                switch ( get_dimensions_order ( std::begin ( il_ ), std::end ( il_ ) ) ) {
-                    case 0:
-                        kd_construct_xy ( m_data.data ( ), std::begin ( points ), std::end ( points ) );
-                        nn_search = &two_dimensional_tree::nn_search_xy;
-                        break;
-                    case 1:
-                        kd_construct_yx ( m_data.data ( ), std::begin ( points ), std::end ( points ) );
-                        nn_search = &two_dimensional_tree::nn_search_yx;
-                        break;
-                }
+                kd_construct_x ( m_data.data ( ), std::begin ( points ), std::end ( points ) );
+                nn_search = &one_dimensional_tree::nn_search_x;
             }
             else {
                 if constexpr ( std::is_same_v<container_type, array_tag> ) {
@@ -239,13 +189,13 @@ struct two_dimensional_tree {
                     m_data.reserve ( il_.size ( ) );
                     std::copy ( std::begin ( il_ ), std::end ( il_ ), std::back_inserter ( m_data ) );
                 }
-                nn_search = &two_dimensional_tree::nn_search_linear;
+                nn_search = &one_dimensional_tree::nn_search_linear;
             }
         }
     }
 
     template<typename ForwardIt>
-    two_dimensional_tree ( ForwardIt first_, ForwardIt last_ ) noexcept {
+    one_dimensional_tree ( ForwardIt first_, ForwardIt last_ ) noexcept {
         initialize ( first_, last_ );
     }
 
@@ -275,8 +225,8 @@ struct two_dimensional_tree {
     [[nodiscard]] static bool is_valid ( const_reference value_type_ ) noexcept { return not std::isnan ( value_type_.x ); }
     [[nodiscard]] static bool is_not_valid ( const_reference value_type_ ) noexcept { return std::isnan ( value_type_.x ); }
 
-    two_dimensional_tree & operator= ( two_dimensional_tree const & ) = delete;
-    two_dimensional_tree & operator                                   = ( two_dimensional_tree && rhs_ ) noexcept {
+    one_dimensional_tree & operator= ( one_dimensional_tree const & ) = delete;
+    one_dimensional_tree & operator                                   = ( one_dimensional_tree && rhs_ ) noexcept {
         m_data       = std::move ( rhs_.m_data );
         m_leaf_start = rhs_.m_leaf_start;
         nn_search    = rhs_.nn_search;
@@ -304,16 +254,8 @@ struct two_dimensional_tree {
                 std::fill ( detail::median_it ( std::begin ( m_data ), std::end ( m_data ) ), std::end ( m_data ),
                             value_type{ std::numeric_limits<value_type>::quiet_NaN ( ) } );
                 m_leaf_start = detail::median_ptr ( m_data.data ( ), m_data.size ( ) );
-                switch ( get_dimensions_order ( first_, last_ ) ) {
-                    case 0:
-                        kd_construct_xy ( m_data.data ( ), first_, last_ );
-                        nn_search = &two_dimensional_tree::nn_search_xy;
-                        break;
-                    case 1:
-                        kd_construct_yx ( m_data.data ( ), first_, last_ );
-                        nn_search = &two_dimensional_tree::nn_search_yx;
-                        break;
-                }
+                kd_construct_x ( m_data.data ( ), first_, last_ );
+                nn_search = &one_dimensional_tree::nn_search_x;
             }
             else {
                 if constexpr ( std::is_same_v<container_type, array_tag> ) {
@@ -323,7 +265,7 @@ struct two_dimensional_tree {
                     m_data.reserve ( n );
                     std::copy ( first_, last_, std::back_inserter ( m_data ) );
                 }
-                nn_search = &two_dimensional_tree::nn_search_linear;
+                nn_search = &one_dimensional_tree::nn_search_linear;
             }
         }
     }
@@ -351,16 +293,14 @@ struct two_dimensional_tree {
     }
 
     [[nodiscard]] static constexpr dist_type distance_squared ( value_type const & p1_, value_type const & p2_ ) noexcept {
-        return ( ( static_cast<dist_type> ( p1_.x ) - static_cast<dist_type> ( p2_.x ) ) *
-                 ( static_cast<dist_type> ( p1_.x ) - static_cast<dist_type> ( p2_.x ) ) ) +
-               ( ( static_cast<dist_type> ( p1_.y ) - static_cast<dist_type> ( p2_.y ) ) *
-                 ( static_cast<dist_type> ( p1_.y ) - static_cast<dist_type> ( p2_.y ) ) );
+        return ( static_cast<dist_type> ( p1_.x ) - static_cast<dist_type> ( p2_.x ) ) *
+               ( static_cast<dist_type> ( p1_.x ) - static_cast<dist_type> ( p2_.x ) );
     }
 
     // For debugging.
 
     template<typename Stream>
-    [[maybe_unused]] friend Stream & operator<< ( Stream & out_, two_dimensional_tree const & tree_ ) noexcept {
+    [[maybe_unused]] friend Stream & operator<< ( Stream & out_, one_dimensional_tree const & tree_ ) noexcept {
         for ( auto const & p : tree_.m_data )
             out_ << p;
         return out_;

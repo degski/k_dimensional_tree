@@ -222,6 +222,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\detail\kdt.hpp" />
+    <ClInclude Include="include\one_dimensional_tree.hpp" />
     <ClInclude Include="include\three_dimensional_tree.hpp" />
     <ClInclude Include="include\two_dimensional_tree.hpp" />
   </ItemGroup>

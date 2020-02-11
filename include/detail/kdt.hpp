@@ -104,7 +104,7 @@ struct message { // needs fixing.
 
     template<typename... Args>
     message ( Args... ) {
-        static_assert ( not( 2 == S or 3 == S ), "2 or 3 dimensions only" );
+        static_assert ( not( 1 == S or 2 == S or 3 == S ), "1, 2 or 3 dimensions only" );
     }
 };
 } // namespace detail
