@@ -21,4 +21,11 @@ A `sax::point2` and `sax::point3 class` are provided, or just drop in **SFML**'s
 
 No map is implemented, but one can return an index of the node that's closest. Simply make lookup-tables for any "mapped" data.
 
-IDEAS: use `std::static_vector` instead of `std::array`.
+### IDEAS:
+
+- use `std::static_vector` instead of `std::array`
+- restrict iterator types correctly with sfinae and `constexpr`
+
+### TODO:
+
+- disable `median_it` for the wrong `ForwardIt`-parameter

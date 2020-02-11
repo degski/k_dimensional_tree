@@ -90,8 +90,12 @@ template<std::size_t StdArraySize>
     return StdArraySize > linear_bound ? sax::next_power_2 ( StdArraySize + 1 ) - 1 : StdArraySize;
 }
 
+template<typename Pointer, typename DiffType, typename = std::enable_if_t<std::is_integral<DiffType>::value>>
+[[nodiscard]] Pointer median_ptr ( Pointer const first_, DiffType const size_ ) noexcept {
+    return first_ + size_ / 2 - 1;
+}
 template<typename ForwardIt>
-[[nodiscard]] ForwardIt median ( ForwardIt const first_, ForwardIt const last_ ) noexcept {
+[[nodiscard]] ForwardIt median_it ( ForwardIt const first_, ForwardIt const last_ ) noexcept {
     return std::next ( first_, std::distance ( first_, last_ ) / 2 );
 }
 

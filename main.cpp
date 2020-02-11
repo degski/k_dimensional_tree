@@ -72,6 +72,11 @@ int main ( ) {
     for ( int i = 0; i < n; ++i )
         points.emplace_back ( disx ( rng ), disy ( rng ) );
 
+    assert ( sax::median_it ( std::begin ( points ), std::end ( points ) ) ==
+             sax::median2 ( std::begin ( points ), std::end ( points ) ) );
+
+    exit ( 0 );
+
     timer.start ( );
 
     sax::two_dimensional_tree<float> tree ( std::begin ( points ), std::end ( points ) );

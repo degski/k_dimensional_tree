@@ -43,9 +43,10 @@ struct point2 {
 
     value_type x, y;
 
-    point2 ( ) noexcept : x{ std::numeric_limits<value_type>::quiet_NaN ( ) } { };
+    point2 ( ) noexcept                = default;
     point2 ( point2 const & ) noexcept = default;
     point2 ( point2 && ) noexcept      = default;
+    point2 ( value_type && x_ ) noexcept : x{ std::move ( x_ ) } {}
     point2 ( value_type && x_, value_type && y_ ) noexcept : x{ std::move ( x_ ) }, y{ std::move ( y_ ) } {}
 
     [[maybe_unused]] point2 & operator= ( point2 const & ) noexcept = default;
@@ -120,24 +121,24 @@ struct two_dimensional_tree {
 
     template<typename RandomIt>
     void kd_construct_xy ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt it = median ( first_, last_ );
-        std::nth_element ( first_, it, last_, [] ( value_type const & a, value_type const & b ) { return a.x < b.x; } );
-        *p_ = *it;
-        if ( first_ != it ) {
-            kd_construct_yx ( left ( p_ ), first_, it );
-            if ( ++it != last_ )
-                kd_construct_yx ( right ( p_ ), it, last_ );
+        RandomIt median = median_it ( first_, last_ );
+        std::nth_element ( first_, median, last_, [] ( value_type const & a, value_type const & b ) { return a.x < b.x; } );
+        *p_ = *median;
+        if ( first_ != median ) {
+            kd_construct_yx ( left ( p_ ), first_, median );
+            if ( ++median != last_ )
+                kd_construct_yx ( right ( p_ ), median, last_ );
         }
     }
     template<typename RandomIt>
     void kd_construct_yx ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt it = median ( first_, last_ );
-        std::nth_element ( first_, it, last_, [] ( value_type const & a, value_type const & b ) { return a.y < b.y; } );
-        *p_ = *it;
-        if ( first_ != it ) {
-            kd_construct_xy ( left ( p_ ), first_, it );
-            if ( ++it != last_ )
-                kd_construct_xy ( right ( p_ ), it, last_ );
+        RandomIt median = median_it ( first_, last_ );
+        std::nth_element ( first_, median, last_, [] ( value_type const & a, value_type const & b ) { return a.y < b.y; } );
+        *p_ = *median;
+        if ( first_ != median ) {
+            kd_construct_xy ( left ( p_ ), first_, median );
+            if ( ++median != last_ )
+                kd_construct_xy ( right ( p_ ), median, last_ );
         }
     }
 
@@ -210,11 +211,11 @@ struct two_dimensional_tree {
             assert ( il_.size ( ) == StdArraySize );
         if ( il_.size ( ) ) {
             if ( il_.size ( ) > linear_bound ) {
-                if constexpr ( std::is_same_v<container_type, array_tag> )
-                    std::fill ( std::begin ( m_data ) + m_data.size ( ) / 2 - 1, std::end ( m_data ), value_type{ } );
-                else
+                if constexpr ( std::is_same_v<container_type, vector_tag> )
                     m_data.resize ( capacity<std::size_t> ( il_.size ( ) ) );
-                m_leaf_start = m_data.data ( ) + m_data.size ( ) / 2 - 1;
+                std::fill ( median_it ( std::begin ( m_data ), std::end ( m_data ) ), std::end ( m_data ),
+                            value_type{ std::numeric_limits<value_type>::quiet_NaN ( ) } );
+                m_leaf_start = median_ptr ( m_data.data ( ), m_data.size ( ) );
                 container points;
                 points.reserve ( il_.size ( ) );
                 std::copy ( std::begin ( il_ ), std::end ( il_ ), std::back_inserter ( points ) );
@@ -297,11 +298,11 @@ struct two_dimensional_tree {
         if ( first_ < last_ ) {
             auto const n = std::distance ( first_, last_ );
             if ( n > linear_bound ) {
-                if constexpr ( std::is_same_v<container_type, array_tag> )
-                    std::fill ( std::begin ( m_data ) + m_data.size ( ) / 2 - 1, std::end ( m_data ), value_type{ } );
-                else
+                if constexpr ( std::is_same_v<container_type, vector_tag> )
                     m_data.resize ( capacity<std::size_t> ( static_cast<std::size_t> ( n ) ) );
-                m_leaf_start = m_data.data ( ) + m_data.size ( ) / 2 - 1;
+                std::fill ( median_it ( std::begin ( m_data ), std::end ( m_data ) ), std::end ( m_data ),
+                            value_type{ std::numeric_limits<value_type>::quiet_NaN ( ) } );
+                m_leaf_start = median_ptr ( m_data.data ( ), m_data.size ( ) );
                 switch ( get_dimensions_order ( first_, last_ ) ) {
                     case 0:
                         kd_construct_xy ( m_data.data ( ), first_, last_ );
