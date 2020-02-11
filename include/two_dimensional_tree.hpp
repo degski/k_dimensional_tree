@@ -49,9 +49,6 @@ struct point2 {
     point2 ( value_type && x_ ) noexcept : x{ std::move ( x_ ) } {} // to set the empty-sentinel-value.
     point2 ( value_type && x_, value_type && y_ ) noexcept : x{ std::move ( x_ ) }, y{ std::move ( y_ ) } {}
 
-    template<typename U>
-    point2 ( U const & other_ ) noexcept : x ( other_.x ), y ( other_.y ) {}
-
     [[maybe_unused]] point2 & operator= ( point2 const & ) noexcept = default;
     [[maybe_unused]] point2 & operator= ( point2 && ) noexcept = default;
 
