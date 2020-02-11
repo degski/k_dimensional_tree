@@ -101,8 +101,6 @@ struct two_dimensional_tree {
     using iterator       = typename container::iterator;
     using const_iterator = typename container::const_iterator;
 
-    inline static constexpr value_type empty = std::numeric_limits<value_type>::quiet_NaN ( );
-
     private:
     template<typename ForwardIt>
     [[nodiscard]] std::size_t get_dimensions_order ( ForwardIt const first_, ForwardIt const last_ ) const noexcept {
