@@ -199,6 +199,8 @@ struct two_dimensional_tree {
     void ( two_dimensional_tree::*nn_search ) ( const_pointer const ) const noexcept;
 
     // These mutable types are class global result types.
+    // In case of multithreading these variables should
+    // be made thread_local.
     mutable const_pointer m_point = nullptr;
     mutable value_type m_to;
     mutable dist_type m_min_distance_squared = std::numeric_limits<dist_type>::max ( );

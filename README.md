@@ -31,4 +31,3 @@ Other than default construction, there is no other way to populate the tree than
 
 - disable `detail::median_it` for the wrong `ForwardIt`-parameter
 - SFML interface
-- copy constructor noexcept for static_tag
