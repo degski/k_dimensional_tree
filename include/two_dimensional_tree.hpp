@@ -36,10 +36,10 @@
 
 namespace sax {
 
-template<typename T>
+template<typename Type>
 struct point2 {
 
-    using value_type = T;
+    using value_type = Type;
 
     value_type x, y;
 
@@ -82,11 +82,11 @@ using point2f = point2<float>;
 using point2d = point2<double>;
 
 // Implicit KD full binary tree of dimension 2.
-template<typename T, typename P = point2<T>, typename Type = vector_tag_t, std::size_t N = 0>
+template<typename Type, typename P = point2<Type>, typename TagType = vector_tag, std::size_t StdArraySize = 0>
 struct two_dimensional_tree {
 
     using value_type = P;
-    using base_type  = T;
+    using base_type  = Type;
     using dist_type =
         std::conditional_t<std::is_floating_point_v<base_type>, base_type, detail::signed_double_width_integer<base_type>>;
     using pointer         = value_type *;
@@ -94,16 +94,16 @@ struct two_dimensional_tree {
     using const_pointer   = value_type const *;
     using const_reference = value_type const &;
 
-    using container_type = Type;
-    using container =
-        std::conditional_t<std::is_same_v<container_type, array_tag_t>, std::array<P, detail::array_size<N> ( )>, std::vector<P>>;
+    using container_type = TagType;
+    using container      = std::conditional_t<std::is_same_v<container_type, array_tag>,
+                                         std::array<P, detail::array_size<StdArraySize> ( )>, std::vector<P>>;
 
     using iterator       = typename container::iterator;
     using const_iterator = typename container::const_iterator;
 
     private:
-    template<typename forward_it>
-    [[nodiscard]] std::size_t get_dimensions_order ( forward_it const first_, forward_it const last_ ) const noexcept {
+    template<typename ForwardIt>
+    [[nodiscard]] std::size_t get_dimensions_order ( ForwardIt const first_, ForwardIt const last_ ) const noexcept {
         auto const [ min_x, max_x ] =
             std::minmax_element ( first_, last_, [] ( auto const & a, auto const & b ) { return a.x < b.x; } );
         auto const [ min_y, max_y ] =
@@ -120,9 +120,9 @@ struct two_dimensional_tree {
         return m_leaf_start < p_ or std::isnan ( left ( p_ )->x );
     }
 
-    template<typename random_it>
-    void kd_construct_xy ( pointer const p_, random_it const first_, random_it const last_ ) noexcept {
-        random_it median = std::next ( first_, std::distance ( first_, last_ ) / 2 );
+    template<typename RandomIt>
+    void kd_construct_xy ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
+        RandomIt median = std::next ( first_, std::distance ( first_, last_ ) / 2 );
         std::nth_element ( first_, median, last_, [] ( value_type const & a, value_type const & b ) { return a.x < b.x; } );
         *p_ = *median;
         if ( first_ != median ) {
@@ -131,9 +131,9 @@ struct two_dimensional_tree {
                 kd_construct_yx ( right ( p_ ), median, last_ );
         }
     }
-    template<typename random_it>
-    void kd_construct_yx ( pointer const p_, random_it const first_, random_it const last_ ) noexcept {
-        random_it median = std::next ( first_, std::distance ( first_, last_ ) / 2 );
+    template<typename RandomIt>
+    void kd_construct_yx ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
+        RandomIt median = std::next ( first_, std::distance ( first_, last_ ) / 2 );
         std::nth_element ( first_, median, last_, [] ( value_type const & a, value_type const & b ) { return a.y < b.y; } );
         *p_ = *median;
         if ( first_ != median ) {
@@ -208,11 +208,11 @@ struct two_dimensional_tree {
         m_data{ std::move ( rhs_.m_data ) }, m_leaf_start{ rhs_.m_leaf_start }, nn_search{ rhs_.nn_search } {}
 
     two_dimensional_tree ( std::initializer_list<value_type> il_ ) noexcept {
-        if constexpr ( std::is_same_v<container_type, array_tag_t> )
-            assert ( il_.size ( ) == N );
+        if constexpr ( std::is_same_v<container_type, array_tag> )
+            assert ( il_.size ( ) == StdArraySize );
         if ( il_.size ( ) ) {
             if ( il_.size ( ) > detail::linear_bound ) {
-                if constexpr ( std::is_same_v<container_type, array_tag_t> )
+                if constexpr ( std::is_same_v<container_type, array_tag> )
                     std::fill ( std::begin ( m_data ) + m_data.size ( ) / 2 - 1, std::end ( m_data ), value_type{ } );
                 else
                     m_data.resize ( capacity<std::size_t> ( il_.size ( ) ) );
@@ -232,7 +232,7 @@ struct two_dimensional_tree {
                 }
             }
             else {
-                if constexpr ( std::is_same_v<container_type, array_tag_t> ) {
+                if constexpr ( std::is_same_v<container_type, array_tag> ) {
                     std::copy_n ( std::begin ( il_ ), il_.size ( ), std::begin ( m_data ) );
                 }
                 else {
@@ -244,17 +244,17 @@ struct two_dimensional_tree {
         }
     }
 
-    template<typename forward_it>
-    two_dimensional_tree ( forward_it first_, forward_it last_ ) noexcept {
+    template<typename ForwardIt>
+    two_dimensional_tree ( ForwardIt first_, ForwardIt last_ ) noexcept {
         initialize ( first_, last_ );
     }
 
-    // Returns (constexpr) the size of the std::array, or the class template parameter N ( = 0).
+    // Returns (constexpr) the size of the std::array, or the class template parameter StdArraySize ( = 0).
     [[nodiscard]] static constexpr std::size_t size ( ) noexcept {
-        if constexpr ( std::is_same_v<container_type, array_tag_t> )
-            return detail::array_size<N> ( );
+        if constexpr ( std::is_same_v<container_type, array_tag> )
+            return detail::array_size<StdArraySize> ( );
         else
-            return N;
+            return StdArraySize;
     }
 
     [[nodiscard]] iterator begin ( ) noexcept { return m_data.begin ( ); }
@@ -292,14 +292,14 @@ struct two_dimensional_tree {
         return m_data[ i_ ];
     }
 
-    template<typename forward_it>
-    void initialize ( forward_it const first_, forward_it const last_ ) noexcept {
-        if constexpr ( std::is_same_v<container_type, array_tag_t> )
-            assert ( std::distance ( first_, last_ ) == N );
+    template<typename ForwardIt>
+    void initialize ( ForwardIt const first_, ForwardIt const last_ ) noexcept {
+        if constexpr ( std::is_same_v<container_type, array_tag> )
+            assert ( std::distance ( first_, last_ ) == StdArraySize );
         if ( first_ < last_ ) {
             auto const n = std::distance ( first_, last_ );
             if ( n > detail::linear_bound ) {
-                if constexpr ( std::is_same_v<container_type, array_tag_t> )
+                if constexpr ( std::is_same_v<container_type, array_tag> )
                     std::fill ( std::begin ( m_data ) + m_data.size ( ) / 2 - 1, std::end ( m_data ), value_type{ } );
                 else
                     m_data.resize ( capacity<std::size_t> ( static_cast<std::size_t> ( n ) ) );
@@ -316,7 +316,7 @@ struct two_dimensional_tree {
                 }
             }
             else {
-                if constexpr ( std::is_same_v<container_type, array_tag_t> ) {
+                if constexpr ( std::is_same_v<container_type, array_tag> ) {
                     std::copy_n ( first_, n, std::begin ( m_data ) );
                 }
                 else {

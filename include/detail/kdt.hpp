@@ -72,9 +72,9 @@ struct signed_double_width_integer<std::int64_t> {
     using type = std::int64_t;
 }; // Inshallah.
 
-template<typename Type>
+template<typename TagType>
 struct same_sized_int {
-    using type = std::make_signed_t<Type>;
+    using type = std::make_signed_t<TagType>;
 };
 template<>
 struct same_sized_int<float> {
@@ -85,9 +85,9 @@ struct same_sized_int<double> {
     using type = std::int64_t;
 };
 
-template<std::size_t N>
+template<std::size_t StdArraySize>
 [[nodiscard]] constexpr std::size_t array_size ( ) noexcept {
-    return N > linear_bound ? sax::next_power_2 ( N + 1 ) - 1 : N;
+    return StdArraySize > linear_bound ? sax::next_power_2 ( StdArraySize + 1 ) - 1 : StdArraySize;
 }
 
 template<std::size_t S>
@@ -100,7 +100,7 @@ struct message { // needs fixing.
 };
 } // namespace detail
 
-struct vector_tag_t {};
-struct array_tag_t {};
+struct vector_tag {};
+struct array_tag {};
 
 } // namespace sax
