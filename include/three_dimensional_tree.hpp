@@ -85,7 +85,7 @@ using point3f = point3<float>;
 using point3d = point3<double>;
 
 // Implicit KD full binary tree of dimension 3.
-template<typename Type, typename Point = point3<Type>, typename TagType = vector_tag, std::size_t StdArraySize = 0>
+template<typename Type, typename Point = point3<Type>, typename TagType = static_tag, std::size_t MaxStaticSize = 0>
 struct three_dimensional_tree {
 
     using value_type = Point;
@@ -98,8 +98,8 @@ struct three_dimensional_tree {
     using const_reference = value_type const &;
 
     using container_type = TagType;
-    using container      = std::conditional_t<std::is_same_v<container_type, array_tag>,
-                                         std::array<Point, detail::array_size<StdArraySize> ( )>, std::vector<Point>>;
+    using container      = std::conditional_t<std::is_same_v<container_type, static_tag>,
+                                         std::static_vector<Point, detail::array_size<MaxStaticSize> ( )>, std::vector<Point>>;
 
     using iterator       = typename container::iterator;
     using const_iterator = typename container::const_iterator;
@@ -356,8 +356,7 @@ struct three_dimensional_tree {
     three_dimensional_tree ( std::initializer_list<value_type> il_ ) noexcept {
         if ( il_.size ( ) ) {
             if ( il_.size ( ) > detail::linear_bound ) {
-                if constexpr ( std::is_same_v<container_type, vector_tag> )
-                    m_data.resize ( capacity<std::size_t> ( il_.size ( ) ) );
+                m_data.resize ( capacity<std::size_t> ( il_.size ( ) ) );
                 std::fill ( detail::median_it ( std::begin ( m_data ), std::end ( m_data ) ), std::end ( m_data ),
                             value_type{ std::numeric_limits<value_type>::quiet_NaN ( ) } );
                 m_leaf_start = detail::median_ptr ( m_data.data ( ), m_data.size ( ) );
@@ -392,13 +391,9 @@ struct three_dimensional_tree {
                 }
             }
             else {
-                if constexpr ( std::is_same_v<container_type, array_tag> ) {
-                    std::copy_n ( std::begin ( il_ ), il_.size ( ), std::begin ( m_data ) );
-                }
-                else {
+                if constexpr ( std::is_same_v<container_type, dynamic_tag> )
                     m_data.reserve ( il_.size ( ) );
-                    std::copy ( std::begin ( il_ ), std::end ( il_ ), std::back_inserter ( m_data ) );
-                }
+                std::copy ( std::begin ( il_ ), std::end ( il_ ), std::back_inserter ( m_data ) );
                 nn_search = &three_dimensional_tree::nn_search_linear;
             }
         }
@@ -449,8 +444,7 @@ struct three_dimensional_tree {
         if ( first_ < last_ ) {
             auto const n = std::distance ( first_, last_ );
             if ( n > detail::linear_bound ) {
-                if constexpr ( std::is_same_v<container_type, array_tag> )
-                    m_data.resize ( capacity<std::size_t> ( static_cast<std::size_t> ( n ) ) );
+                m_data.resize ( capacity<std::size_t> ( static_cast<std::size_t> ( n ) ) );
                 std::fill ( detail::median_it ( std::begin ( m_data ), std::end ( m_data ) ), std::end ( m_data ),
                             value_type{ std::numeric_limits<value_type>::quiet_NaN ( ) } );
                 m_leaf_start = detail::median_ptr ( m_data.data ( ), m_data.size ( ) );
@@ -482,13 +476,9 @@ struct three_dimensional_tree {
                 }
             }
             else {
-                if constexpr ( std::is_same_v<container_type, array_tag> ) {
-                    std::copy_n ( first_, n, std::begin ( m_data ) );
-                }
-                else {
+                if constexpr ( std::is_same_v<container_type, dynamic_tag> )
                     m_data.reserve ( n );
-                    std::copy ( first_, last_, std::back_inserter ( m_data ) );
-                }
+                std::copy ( first_, last_, std::back_inserter ( m_data ) );
                 nn_search = &three_dimensional_tree::nn_search_linear;
             }
         }

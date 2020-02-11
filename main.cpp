@@ -33,6 +33,7 @@
 #include <map>
 #include <random>
 #include <sax/iostream.hpp>
+#include <static_vector>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -72,9 +73,6 @@ int main ( ) {
 
     for ( int i = 0; i < n; ++i )
         points.emplace_back ( disx ( rng ), disy ( rng ) );
-
-    assert ( sax::detail::median_it ( std::begin ( points ), std::end ( points ) ) ==
-             sax::median2 ( std::begin ( points ), std::end ( points ) ) );
 
     exit ( 0 );
 

@@ -109,7 +109,7 @@ struct message { // needs fixing.
 };
 } // namespace detail
 
-struct vector_tag {};
-struct array_tag {};
+struct dynamic_tag {};
+struct static_tag {};
 
 } // namespace sax
