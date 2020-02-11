@@ -6,5 +6,4 @@
 /_clang-format
 /x64/Debug
 /x64/Release
-*.vcxproj.filters
 *.vcxproj.user

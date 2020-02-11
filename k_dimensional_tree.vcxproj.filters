@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\detail\kdt.hpp">
+      <Filter>sax\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\one_dimensional_tree.hpp">
+      <Filter>sax</Filter>
+    </ClInclude>
+    <ClInclude Include="include\three_dimensional_tree.hpp">
+      <Filter>sax</Filter>
+    </ClInclude>
+    <ClInclude Include="include\two_dimensional_tree.hpp">
+      <Filter>sax</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="sax">
+      <UniqueIdentifier>{7019c219-795a-4be7-a88c-f2ec6eb35596}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sax\detail">
+      <UniqueIdentifier>{09a70bb5-4bb5-4ea2-a65f-36f9b89778e4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
