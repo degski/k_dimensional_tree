@@ -47,9 +47,9 @@
 namespace sax {
 
 template<typename base_type, std::size_t S>
-using k_dimensional_tree =
-    typename std::conditional<2u == S, two_dimensional_tree<base_type>,
-                              typename std::conditional<3u == S, three_dimensional_tree<base_type>, message<S>>::type>::type;
+using k_dimensional_tree = typename std::conditional<
+    2u == S, two_dimensional_tree<base_type>,
+    typename std::conditional<3u == S, three_dimensional_tree<base_type>, detail::message<S>>::type>::type;
 }
 
 int main ( ) {
@@ -72,7 +72,7 @@ int main ( ) {
     for ( int i = 0; i < n; ++i )
         points.emplace_back ( disx ( rng ), disy ( rng ) );
 
-    assert ( sax::median_it ( std::begin ( points ), std::end ( points ) ) ==
+    assert ( sax::detail::median_it ( std::begin ( points ), std::end ( points ) ) ==
              sax::median2 ( std::begin ( points ), std::end ( points ) ) );
 
     exit ( 0 );

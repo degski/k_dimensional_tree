@@ -79,23 +79,22 @@ struct point2 {
 using point2f = point2<float>;
 using point2d = point2<double>;
 
-using namespace detail;
-
 // Implicit KD full binary tree of dimension 2.
 template<typename Type, typename Point = point2<Type>, typename TagType = vector_tag, std::size_t StdArraySize = 0>
 struct two_dimensional_tree {
 
     using value_type = Point;
     using base_type  = Type;
-    using dist_type  = std::conditional_t<std::is_floating_point_v<base_type>, base_type, signed_double_width_integer<base_type>>;
-    using pointer    = value_type *;
-    using reference  = value_type &;
+    using dist_type =
+        std::conditional_t<std::is_floating_point_v<base_type>, base_type, detail::signed_double_width_integer<base_type>>;
+    using pointer         = value_type *;
+    using reference       = value_type &;
     using const_pointer   = value_type const *;
     using const_reference = value_type const &;
 
     using container_type = TagType;
-    using container = std::conditional_t<std::is_same_v<container_type, array_tag>, std::array<Point, array_size<StdArraySize> ( )>,
-                                         std::vector<Point>>;
+    using container      = std::conditional_t<std::is_same_v<container_type, array_tag>,
+                                         std::array<Point, detail::array_size<StdArraySize> ( )>, std::vector<Point>>;
 
     using iterator       = typename container::iterator;
     using const_iterator = typename container::const_iterator;
@@ -121,7 +120,7 @@ struct two_dimensional_tree {
 
     template<typename RandomIt>
     void kd_construct_xy ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt median = median_it ( first_, last_ );
+        RandomIt median = detail::median_it ( first_, last_ );
         std::nth_element ( first_, median, last_, [] ( value_type const & a, value_type const & b ) { return a.x < b.x; } );
         *p_ = *median;
         if ( first_ != median ) {
@@ -132,7 +131,7 @@ struct two_dimensional_tree {
     }
     template<typename RandomIt>
     void kd_construct_yx ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt median = median_it ( first_, last_ );
+        RandomIt median = detail::median_it ( first_, last_ );
         std::nth_element ( first_, median, last_, [] ( value_type const & a, value_type const & b ) { return a.y < b.y; } );
         *p_ = *median;
         if ( first_ != median ) {
@@ -210,12 +209,12 @@ struct two_dimensional_tree {
         if constexpr ( std::is_same_v<container_type, array_tag> )
             assert ( il_.size ( ) == StdArraySize );
         if ( il_.size ( ) ) {
-            if ( il_.size ( ) > linear_bound ) {
+            if ( il_.size ( ) > detail::linear_bound ) {
                 if constexpr ( std::is_same_v<container_type, vector_tag> )
                     m_data.resize ( capacity<std::size_t> ( il_.size ( ) ) );
-                std::fill ( median_it ( std::begin ( m_data ), std::end ( m_data ) ), std::end ( m_data ),
+                std::fill ( detail::median_it ( std::begin ( m_data ), std::end ( m_data ) ), std::end ( m_data ),
                             value_type{ std::numeric_limits<value_type>::quiet_NaN ( ) } );
-                m_leaf_start = median_ptr ( m_data.data ( ), m_data.size ( ) );
+                m_leaf_start = detail::median_ptr ( m_data.data ( ), m_data.size ( ) );
                 container points;
                 points.reserve ( il_.size ( ) );
                 std::copy ( std::begin ( il_ ), std::end ( il_ ), std::back_inserter ( points ) );
@@ -297,12 +296,12 @@ struct two_dimensional_tree {
             assert ( std::distance ( first_, last_ ) == StdArraySize );
         if ( first_ < last_ ) {
             auto const n = std::distance ( first_, last_ );
-            if ( n > linear_bound ) {
+            if ( n > detail::linear_bound ) {
                 if constexpr ( std::is_same_v<container_type, vector_tag> )
                     m_data.resize ( capacity<std::size_t> ( static_cast<std::size_t> ( n ) ) );
-                std::fill ( median_it ( std::begin ( m_data ), std::end ( m_data ) ), std::end ( m_data ),
+                std::fill ( detail::median_it ( std::begin ( m_data ), std::end ( m_data ) ), std::end ( m_data ),
                             value_type{ std::numeric_limits<value_type>::quiet_NaN ( ) } );
-                m_leaf_start = median_ptr ( m_data.data ( ), m_data.size ( ) );
+                m_leaf_start = detail::median_ptr ( m_data.data ( ), m_data.size ( ) );
                 switch ( get_dimensions_order ( first_, last_ ) ) {
                     case 0:
                         kd_construct_xy ( m_data.data ( ), first_, last_ );
@@ -367,7 +366,7 @@ struct two_dimensional_tree {
     template<typename U>
     [[nodiscard]] static constexpr U capacity ( U const i_ ) noexcept {
         assert ( i_ > 0 );
-        return i_ > linear_bound ? sax::next_power_2 ( i_ + 1 ) - 1 : i_;
+        return i_ > detail::linear_bound ? sax::next_power_2 ( i_ + 1 ) - 1 : i_;
     }
 };
 

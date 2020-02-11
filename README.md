@@ -28,4 +28,4 @@ No map is implemented, but one can return an index of the node that's closest. S
 
 ### TODO:
 
-- disable `median_it` for the wrong `ForwardIt`-parameter
+- disable `detail::median_it` for the wrong `ForwardIt`-parameter
