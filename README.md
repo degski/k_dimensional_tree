@@ -21,7 +21,7 @@ A `sax::point1`, `sax::point2` and `sax::point3 class` are provided, conversions
 
 No map/node-data is implemented, but one can return an index of the node that's closest, enabling flexible lookup-tables for any 'mapped' data, while keeping the data structure as compact as possible.
 
-In case of construction from range-iterators, objects in the 'source' will be permutated after the construction.
+Other than default construction, there is no other way to populate the tree than from range-iterators, objects in the 'source' will be permutated after the construction.
 
 ### IDEAS:
 
@@ -31,3 +31,4 @@ In case of construction from range-iterators, objects in the 'source' will be pe
 
 - disable `detail::median_it` for the wrong `ForwardIt`-parameter
 - SFML interface
+- copy constructor noexcept for static_tag

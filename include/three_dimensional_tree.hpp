@@ -348,12 +348,14 @@ struct three_dimensional_tree {
     mutable dist_type m_min_distance_squared = std::numeric_limits<dist_type>::max ( );
 
     public:
-    three_dimensional_tree ( ) noexcept {}
-    three_dimensional_tree ( three_dimensional_tree const & ) = delete;
-    three_dimensional_tree ( three_dimensional_tree && rhs_ ) noexcept :
-        m_data{ std::move ( rhs_.m_data ) }, m_leaf_start{ rhs_.m_leaf_start }, nn_search{ rhs_.nn_search } {}
+    three_dimensional_tree ( ) noexcept                           = default;
+    three_dimensional_tree ( three_dimensional_tree const & )     = default;
+    three_dimensional_tree ( three_dimensional_tree && ) noexcept = delete;
 
     three_dimensional_tree ( std::initializer_list<value_type> ) noexcept = delete;
+
+    [[maybe_unused]] three_dimensional_tree & operator= ( three_dimensional_tree const & rhs_ ) = default;
+    [[maybe_unused]] three_dimensional_tree & operator= ( three_dimensional_tree && rhs_ ) noexcept = delete;
 
     template<typename ForwardIt>
     three_dimensional_tree ( ForwardIt first_, ForwardIt last_ ) noexcept {
@@ -420,14 +422,6 @@ struct three_dimensional_tree {
 
     [[nodiscard]] static bool is_valid ( const_reference value_type_ ) noexcept { return not std::isnan ( value_type_.x ); }
     [[nodiscard]] static bool is_not_valid ( const_reference value_type_ ) noexcept { return std::isnan ( value_type_.x ); }
-
-    three_dimensional_tree & operator= ( three_dimensional_tree const & ) = delete;
-    three_dimensional_tree & operator                                     = ( three_dimensional_tree && rhs_ ) noexcept {
-        m_data       = std::move ( rhs_.m_data );
-        m_leaf_start = rhs_.m_leaf_start;
-        nn_search    = rhs_.nn_search;
-        return *this;
-    }
 
     template<typename size_type>
     [[nodiscard]] reference operator[] ( size_type const i_ ) noexcept {
