@@ -82,7 +82,7 @@ using point2f = point2<float>;
 using point2d = point2<double>;
 
 // Implicit KD full binary tree of dimension 2.
-template<typename Type, typename Point = point2<Type>, typename TagType = static_tag, std::size_t MaxStaticSize = 0>
+template<typename Type, typename Point = point2<Type>, typename TagType = dynamic_tag, std::size_t MaxStaticSize = 0>
 struct two_dimensional_tree {
 
     using value_type = Point;
