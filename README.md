@@ -17,6 +17,6 @@ The implementation uses recursion for both construction and nn-search and is str
     struct two_dimensional_tree;
 
 
-A `sax::point2` and `sax::point3 class` are provided, or just drop in **SFML**'s `sf::Vector2` or `sf::Vector3`. The parameter `StdArraySize` has no effect in case of a vector, which is the default container type.
+A `sax::point2` and `sax::point3 class` are provided, or just drop in **SFML**'s `sf::Vector2` or `sf::Vector3`. The parameter `StdArraySize` has no effect in case of a `std::vector`, which is the default container type.
 
 No map is implemented, but one can return an index of the node that's closest. Simply make lookup-tables for any "mapped" data.
