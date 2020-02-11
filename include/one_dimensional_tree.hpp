@@ -30,7 +30,6 @@
 
 #include <limits>
 #include <sax/iostream.hpp>
-#include <static_vector>
 #include <type_traits>
 
 #include "detail/kdt.hpp"
@@ -44,7 +43,7 @@ struct point1 {
 
     value_type x, y;
 
-    point1 ( ) noexcept                = default;
+    point1 ( ) noexcept : x ( std::numeric_limits<Type>::quiet_NaN ( ) ) {}
     point1 ( point1 const & ) noexcept = default;
     point1 ( point1 && ) noexcept      = default;
     point1 ( value_type && x_ ) noexcept : x{ std::move ( x_ ) } {}
@@ -93,8 +92,8 @@ struct one_dimensional_tree {
     using const_reference = value_type const &;
 
     using container_type = TagType;
-    using container      = std::conditional_t<std::is_same_v<container_type, static_tag>,
-                                         std::static_vector<Point, detail::array_size<MaxStaticSize> ( )>, std::vector<Point>>;
+    using container      = std::conditional_t<std::is_same_v<container_type, static_tag>, std::static_vector<Point, MaxStaticSize>,
+                                         std::vector<Point>>;
 
     using iterator       = typename container::iterator;
     using const_iterator = typename container::const_iterator;
@@ -166,31 +165,30 @@ struct one_dimensional_tree {
     one_dimensional_tree ( one_dimensional_tree && rhs_ ) noexcept :
         m_data{ std::move ( rhs_.m_data ) }, m_leaf_start{ rhs_.m_leaf_start }, nn_search{ rhs_.nn_search } {}
 
-    one_dimensional_tree ( std::initializer_list<value_type> il_ ) noexcept {
-        if ( il_.size ( ) ) {
-            if ( il_.size ( ) > detail::linear_bound ) {
-                m_data.resize ( capacity<std::size_t> ( il_.size ( ) ) );
-                std::fill ( detail::median_it ( std::begin ( m_data ), std::end ( m_data ) ), std::end ( m_data ),
-                            value_type{ std::numeric_limits<value_type>::quiet_NaN ( ) } );
-                m_leaf_start = detail::median_ptr ( m_data.data ( ), m_data.size ( ) );
-                container points;
-                points.reserve ( il_.size ( ) );
-                std::copy ( std::begin ( il_ ), std::end ( il_ ), std::back_inserter ( points ) );
-                kd_construct_x ( m_data.data ( ), std::begin ( points ), std::end ( points ) );
-                nn_search = &one_dimensional_tree::nn_search_x;
-            }
-            else {
-                if constexpr ( std::is_same_v<container_type, dynamic_tag> )
-                    m_data.reserve ( il_.size ( ) );
-                std::copy ( std::begin ( il_ ), std::end ( il_ ), std::back_inserter ( m_data ) );
-                nn_search = &one_dimensional_tree::nn_search_linear;
-            }
-        }
-    }
+    one_dimensional_tree ( std::initializer_list<value_type> ) noexcept = delete;
 
     template<typename ForwardIt>
     one_dimensional_tree ( ForwardIt first_, ForwardIt last_ ) noexcept {
         initialize ( first_, last_ );
+    }
+
+    template<typename ForwardIt>
+    void initialize ( ForwardIt const first_, ForwardIt const last_ ) noexcept {
+        auto const n = std::distance ( first_, last_ );
+        if ( n ) {
+            if ( n > detail::linear_bound ) {
+                m_data.resize ( capacity ( static_cast<std::size_t> ( n ) );
+                m_leaf_start = detail::median_ptr ( m_data.data ( ), m_data.size ( ) );
+                kd_construct_x ( m_data.data ( ), first_, last_ );
+                nn_search = &one_dimensional_tree::nn_search_x;
+            }
+            else {
+                if constexpr ( std::is_same_v<container_type, dynamic_tag> )
+                    m_data.reserve ( n );
+                std::copy ( first_, last_, std::back_inserter ( m_data ) );
+                nn_search = &one_dimensional_tree::nn_search_linear;
+            }
+        }
     }
 
     [[nodiscard]] iterator begin ( ) noexcept { return m_data.begin ( ); }
@@ -226,27 +224,6 @@ struct one_dimensional_tree {
     template<typename size_type>
     [[nodiscard]] const_reference operator[] ( size_type const i_ ) const noexcept {
         return m_data[ i_ ];
-    }
-
-    template<typename ForwardIt>
-    void initialize ( ForwardIt const first_, ForwardIt const last_ ) noexcept {
-        if ( first_ < last_ ) {
-            auto const n = std::distance ( first_, last_ );
-            if ( n > detail::linear_bound ) {
-                m_data.resize ( capacity<std::size_t> ( static_cast<std::size_t> ( n ) ) );
-                std::fill ( detail::median_it ( std::begin ( m_data ), std::end ( m_data ) ), std::end ( m_data ),
-                            value_type{ std::numeric_limits<value_type>::quiet_NaN ( ) } );
-                m_leaf_start = detail::median_ptr ( m_data.data ( ), m_data.size ( ) );
-                kd_construct_x ( m_data.data ( ), first_, last_ );
-                nn_search = &one_dimensional_tree::nn_search_x;
-            }
-            else {
-                if constexpr ( std::is_same_v<container_type, dynamic_tag> )
-                    m_data.reserve ( n );
-                std::copy ( first_, last_, std::back_inserter ( m_data ) );
-                nn_search = &one_dimensional_tree::nn_search_linear;
-            }
-        }
     }
 
     [[nodiscard]] const_pointer nn_pointer ( value_type const & point_ ) const noexcept {

@@ -46,6 +46,7 @@
 #include "three_dimensional_tree.hpp"
 #include "two_dimensional_tree.hpp"
 
+/*
 namespace sax {
 
 template<typename base_type, std::size_t S>
@@ -53,6 +54,7 @@ using k_dimensional_tree = typename std::conditional<
     2u == S, two_dimensional_tree<base_type>,
     typename std::conditional<3u == S, three_dimensional_tree<base_type>, detail::message<S>>::type>::type;
 }
+*/
 
 int main ( ) {
 
@@ -67,14 +69,10 @@ int main ( ) {
 
     constexpr int n = 25'000;
 
-    // std::cout << bin_tree_size ( n ) << nl;
-
     std::vector<sax::point2f> points;
 
     for ( int i = 0; i < n; ++i )
         points.emplace_back ( disx ( rng ), disy ( rng ) );
-
-    exit ( 0 );
 
     timer.start ( );
 
@@ -82,7 +80,7 @@ int main ( ) {
 
     std::cout << "elapsed construction " << ( std::uint64_t ) timer.get_elapsed_us ( ) << " us" << nl;
 
-    // std::cout << nl << tree << nl << nl;
+    std::cout << nl << tree << nl << nl;
 
     /*
 

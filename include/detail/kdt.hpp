@@ -23,16 +23,25 @@
 
 #pragma once
 
+#if defined( _WIN32 ) && !defined( _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING )
+#    define _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
+#endif
+
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 
+#include <static_vector>
 #include <type_traits>
 
 #include <sax/stl.hpp>
 
 namespace sax {
+
+struct dynamic_tag {};
+struct static_tag {};
+
 namespace detail {
 
 constexpr std::size_t linear_bound = 64u;
@@ -85,9 +94,8 @@ struct same_sized_int<double> {
     using type = std::int64_t;
 };
 
-template<std::size_t StdArraySize>
-[[nodiscard]] constexpr std::size_t array_size ( ) noexcept {
-    return StdArraySize > linear_bound ? sax::next_power_2 ( StdArraySize + 1 ) - 1 : StdArraySize;
+[[nodiscard]] constexpr std::size_t capacity ( std::size_t cap_ ) noexcept {
+    return cap_ > linear_bound ? sax::next_power_2 ( cap_ + 1 ) - 1 : cap_;
 }
 
 template<typename Pointer, typename DiffType, typename = std::enable_if_t<std::is_integral<DiffType>::value>>
@@ -107,9 +115,25 @@ struct message { // needs fixing.
         static_assert ( not( 1 == S or 2 == S or 3 == S ), "1, 2 or 3 dimensions only" );
     }
 };
-} // namespace detail
 
-struct dynamic_tag {};
-struct static_tag {};
+template<typename OutputIt, typename Size, typename T>
+void fill_n ( OutputIt first_, Size count_, T const & value_ ) {
+#if defined( _WIN32 ) && !( defined( __clang__ ) || defined( __GNUC__ ) )
+#    pragma warning( disable : 4834 ) // shouldn't this function be maybe unused?
+#endif
+    std::fill_n ( first_, count_, value_ );
+#if defined( _WIN32 ) && !( defined( __clang__ ) || defined( __GNUC__ ) )
+#    pragma warning( default : 4834 )
+#endif
+}
+
+template<typename Container, typename It, typename ValueType, typename Tag, typename SizeType>
+void fill_data ( Container & c_, It first_, It last_, SizeType n_ ) {
+    std::size_t cap = capacity ( static_cast<std::size_t> ( n_ ) );
+
+    detail::fill_ ( sax::back_emplacer ( c_ ), cap - c_.size ( ), std::numeric_limits<ValueType>::quiet_NaN ( ) );
+}
+
+} // namespace detail
 
 } // namespace sax
