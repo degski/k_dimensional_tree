@@ -116,24 +116,6 @@ struct message { // needs fixing.
     }
 };
 
-template<typename OutputIt, typename Size, typename T>
-void fill_n ( OutputIt first_, Size count_, T const & value_ ) {
-#if defined( _WIN32 ) && !( defined( __clang__ ) || defined( __GNUC__ ) )
-#    pragma warning( disable : 4834 ) // shouldn't this function be maybe unused?
-#endif
-    std::fill_n ( first_, count_, value_ );
-#if defined( _WIN32 ) && !( defined( __clang__ ) || defined( __GNUC__ ) )
-#    pragma warning( default : 4834 )
-#endif
-}
-
-template<typename Container, typename It, typename ValueType, typename Tag, typename SizeType>
-void fill_data ( Container & c_, It first_, It last_, SizeType n_ ) {
-    std::size_t cap = capacity ( static_cast<std::size_t> ( n_ ) );
-
-    detail::fill_ ( sax::back_emplacer ( c_ ), cap - c_.size ( ), std::numeric_limits<ValueType>::quiet_NaN ( ) );
-}
-
 } // namespace detail
 
 } // namespace sax
