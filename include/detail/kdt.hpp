@@ -90,6 +90,11 @@ template<std::size_t StdArraySize>
     return StdArraySize > linear_bound ? sax::next_power_2 ( StdArraySize + 1 ) - 1 : StdArraySize;
 }
 
+template<typename RandomIt>
+[[nodiscard]] RandomIt median ( RandomIt const first_, RandomIt const last_ ) noexcept {
+    return detail::median ( first_, last_ );
+}
+
 template<std::size_t S>
 struct message { // needs fixing.
 
