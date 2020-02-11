@@ -47,9 +47,9 @@
 namespace sax {
 
 template<typename base_type, std::size_t S>
-using k_dimensional_tree = typename std::conditional<
-    2u == S, two_dimensional_tree<base_type>,
-    typename std::conditional<3u == S, three_dimensional_tree<base_type>, detail::message<S>>::type>::type;
+using k_dimensional_tree =
+    typename std::conditional<2u == S, two_dimensional_tree<base_type>,
+                              typename std::conditional<3u == S, three_dimensional_tree<base_type>, message<S>>::type>::type;
 }
 
 int main ( ) {

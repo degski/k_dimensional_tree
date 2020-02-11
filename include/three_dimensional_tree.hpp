@@ -81,22 +81,23 @@ struct point3 {
 using point3f = point3<float>;
 using point3d = point3<double>;
 
+using namespace detail;
+
 // Implicit KD full binary tree of dimension 3.
 template<typename Type, typename Point = point3<Type>, typename TagType = vector_tag, std::size_t StdArraySize = 0>
 struct three_dimensional_tree {
 
     using value_type = Point;
     using base_type  = Type;
-    using dist_type =
-        std::conditional_t<std::is_floating_point_v<base_type>, base_type, detail::signed_double_width_integer<base_type>>;
-    using pointer         = value_type *;
-    using reference       = value_type &;
+    using dist_type  = std::conditional_t<std::is_floating_point_v<base_type>, base_type, signed_double_width_integer<base_type>>;
+    using pointer    = value_type *;
+    using reference  = value_type &;
     using const_pointer   = value_type const *;
     using const_reference = value_type const &;
 
     using container_type = TagType;
-    using container      = std::conditional_t<std::is_same_v<container_type, array_tag>,
-                                         std::array<Point, detail::array_size<StdArraySize> ( )>, std::vector<Point>>;
+    using container = std::conditional_t<std::is_same_v<container_type, array_tag>, std::array<Point, array_size<StdArraySize> ( )>,
+                                         std::vector<Point>>;
 
     using iterator       = typename container::iterator;
     using const_iterator = typename container::const_iterator;
@@ -110,7 +111,7 @@ struct three_dimensional_tree {
             std::minmax_element ( first_, last_, [] ( auto const & a, auto const & b ) noexcept { return a.y < b.y; } );
         auto const [ min_z, max_z ] =
             std::minmax_element ( first_, last_, [] ( auto const & a, auto const & b ) noexcept { return a.z < b.z; } );
-        sax::pair<base_type, detail::same_sized_int<base_type>> dx{ max_x->x - min_x->x, 0 }, dy{ max_y->y - min_y->y, 1 },
+        sax::pair<base_type, same_sized_int<base_type>> dx{ max_x->x - min_x->x, 0 }, dy{ max_y->y - min_y->y, 1 },
             dz{ max_z->z - min_z->z, 2 };
         // sort list of 3.
         if ( dx.first < dy.first )
@@ -137,75 +138,69 @@ struct three_dimensional_tree {
 
     template<typename RandomIt>
     void kd_construct_xy ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt median = detail::median ( first_, last_ );
-        std::nth_element ( first_, median, last_,
-                           [] ( value_type const & a, value_type const & b ) noexcept { return a.x < b.x; } );
-        *p_ = *median;
-        if ( first_ != median ) {
-            kd_construct_yz ( left ( p_ ), first_, median );
-            if ( ++median != last_ )
-                kd_construct_yz ( right ( p_ ), median, last_ );
+        RandomIt it = median ( first_, last_ );
+        std::nth_element ( first_, it, last_, [] ( value_type const & a, value_type const & b ) noexcept { return a.x < b.x; } );
+        *p_ = *it;
+        if ( first_ != it ) {
+            kd_construct_yz ( left ( p_ ), first_, it );
+            if ( ++it != last_ )
+                kd_construct_yz ( right ( p_ ), it, last_ );
         }
     }
     template<typename RandomIt>
     void kd_construct_yz ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt median = detail::median ( first_, last_ );
-        std::nth_element ( first_, median, last_,
-                           [] ( value_type const & a, value_type const & b ) noexcept { return a.y < b.y; } );
-        *p_ = *median;
-        if ( first_ != median ) {
-            kd_construct_zx ( left ( p_ ), first_, median );
-            if ( ++median != last_ )
-                kd_construct_zx ( right ( p_ ), median, last_ );
+        RandomIt it = median ( first_, last_ );
+        std::nth_element ( first_, it, last_, [] ( value_type const & a, value_type const & b ) noexcept { return a.y < b.y; } );
+        *p_ = *it;
+        if ( first_ != it ) {
+            kd_construct_zx ( left ( p_ ), first_, it );
+            if ( ++it != last_ )
+                kd_construct_zx ( right ( p_ ), it, last_ );
         }
     }
     template<typename RandomIt>
     void kd_construct_zx ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt median = detail::median ( first_, last_ );
-        std::nth_element ( first_, median, last_,
-                           [] ( value_type const & a, value_type const & b ) noexcept { return a.z < b.z; } );
-        *p_ = *median;
-        if ( first_ != median ) {
-            kd_construct_xy ( left ( p_ ), first_, median );
-            if ( ++median != last_ )
-                kd_construct_xy ( right ( p_ ), median, last_ );
+        RandomIt it = median ( first_, last_ );
+        std::nth_element ( first_, it, last_, [] ( value_type const & a, value_type const & b ) noexcept { return a.z < b.z; } );
+        *p_ = *it;
+        if ( first_ != it ) {
+            kd_construct_xy ( left ( p_ ), first_, it );
+            if ( ++it != last_ )
+                kd_construct_xy ( right ( p_ ), it, last_ );
         }
     }
 
     template<typename RandomIt>
     void kd_construct_xz ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt median = detail::median ( first_, last_ );
-        std::nth_element ( first_, median, last_,
-                           [] ( value_type const & a, value_type const & b ) noexcept { return a.x < b.x; } );
-        *p_ = *median;
-        if ( first_ != median ) {
-            kd_construct_zy ( left ( p_ ), first_, median );
-            if ( ++median != last_ )
-                kd_construct_zy ( right ( p_ ), median, last_ );
+        RandomIt it = median ( first_, last_ );
+        std::nth_element ( first_, it, last_, [] ( value_type const & a, value_type const & b ) noexcept { return a.x < b.x; } );
+        *p_ = *it;
+        if ( first_ != it ) {
+            kd_construct_zy ( left ( p_ ), first_, it );
+            if ( ++it != last_ )
+                kd_construct_zy ( right ( p_ ), it, last_ );
         }
     }
     template<typename RandomIt>
     void kd_construct_yx ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt median = detail::median ( first_, last_ );
-        std::nth_element ( first_, median, last_,
-                           [] ( value_type const & a, value_type const & b ) noexcept { return a.y < b.y; } );
-        *p_ = *median;
-        if ( first_ != median ) {
-            kd_construct_xz ( left ( p_ ), first_, median );
-            if ( ++median != last_ )
-                kd_construct_xz ( right ( p_ ), median, last_ );
+        RandomIt it = median ( first_, last_ );
+        std::nth_element ( first_, it, last_, [] ( value_type const & a, value_type const & b ) noexcept { return a.y < b.y; } );
+        *p_ = *it;
+        if ( first_ != it ) {
+            kd_construct_xz ( left ( p_ ), first_, it );
+            if ( ++it != last_ )
+                kd_construct_xz ( right ( p_ ), it, last_ );
         }
     }
     template<typename RandomIt>
     void kd_construct_zy ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt median = detail::median ( first_, last_ );
-        std::nth_element ( first_, median, last_,
-                           [] ( value_type const & a, value_type const & b ) noexcept { return a.z < b.z; } );
-        *p_ = *median;
-        if ( first_ != median ) {
-            kd_construct_yx ( left ( p_ ), first_, median );
-            if ( ++median != last_ )
-                kd_construct_yx ( right ( p_ ), median, last_ );
+        RandomIt it = median ( first_, last_ );
+        std::nth_element ( first_, it, last_, [] ( value_type const & a, value_type const & b ) noexcept { return a.z < b.z; } );
+        *p_ = *it;
+        if ( first_ != it ) {
+            kd_construct_yx ( left ( p_ ), first_, it );
+            if ( ++it != last_ )
+                kd_construct_yx ( right ( p_ ), it, last_ );
         }
     }
 
@@ -352,7 +347,7 @@ struct three_dimensional_tree {
 
     three_dimensional_tree ( std::initializer_list<value_type> il_ ) noexcept {
         if ( il_.size ( ) ) {
-            if ( il_.size ( ) > detail::linear_bound ) {
+            if ( il_.size ( ) > linear_bound ) {
                 if constexpr ( std::is_same_v<container_type, array_tag> )
                     std::fill ( std::begin ( m_data ) + m_data.size ( ) / 2 - 1, std::end ( m_data ), value_type{ } );
                 else
@@ -445,7 +440,7 @@ struct three_dimensional_tree {
     void initialize ( ForwardIt const first_, ForwardIt const last_ ) noexcept {
         if ( first_ < last_ ) {
             auto const n = std::distance ( first_, last_ );
-            if ( n > detail::linear_bound ) {
+            if ( n > linear_bound ) {
                 if constexpr ( std::is_same_v<container_type, array_tag> )
                     std::fill ( std::begin ( m_data ) + m_data.size ( ) / 2 - 1, std::end ( m_data ), value_type{ } );
                 else
@@ -529,7 +524,7 @@ struct three_dimensional_tree {
     template<typename U>
     [[nodiscard]] static constexpr U capacity ( U const i_ ) noexcept {
         assert ( i_ > 0 );
-        return i_ > detail::linear_bound ? sax::next_power_2 ( i_ + 1 ) - 1 : i_;
+        return i_ > linear_bound ? sax::next_power_2 ( i_ + 1 ) - 1 : i_;
     }
 };
 

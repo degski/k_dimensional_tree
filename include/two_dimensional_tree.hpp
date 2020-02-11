@@ -78,22 +78,23 @@ struct point2 {
 using point2f = point2<float>;
 using point2d = point2<double>;
 
+using namespace detail;
+
 // Implicit KD full binary tree of dimension 2.
 template<typename Type, typename Point = point2<Type>, typename TagType = vector_tag, std::size_t StdArraySize = 0>
 struct two_dimensional_tree {
 
     using value_type = Point;
     using base_type  = Type;
-    using dist_type =
-        std::conditional_t<std::is_floating_point_v<base_type>, base_type, detail::signed_double_width_integer<base_type>>;
-    using pointer         = value_type *;
-    using reference       = value_type &;
+    using dist_type  = std::conditional_t<std::is_floating_point_v<base_type>, base_type, signed_double_width_integer<base_type>>;
+    using pointer    = value_type *;
+    using reference  = value_type &;
     using const_pointer   = value_type const *;
     using const_reference = value_type const &;
 
     using container_type = TagType;
-    using container      = std::conditional_t<std::is_same_v<container_type, array_tag>,
-                                         std::array<Point, detail::array_size<StdArraySize> ( )>, std::vector<Point>>;
+    using container = std::conditional_t<std::is_same_v<container_type, array_tag>, std::array<Point, array_size<StdArraySize> ( )>,
+                                         std::vector<Point>>;
 
     using iterator       = typename container::iterator;
     using const_iterator = typename container::const_iterator;
@@ -119,24 +120,24 @@ struct two_dimensional_tree {
 
     template<typename RandomIt>
     void kd_construct_xy ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt median = detail::median ( first_, last_ );
-        std::nth_element ( first_, median, last_, [] ( value_type const & a, value_type const & b ) { return a.x < b.x; } );
-        *p_ = *median;
-        if ( first_ != median ) {
-            kd_construct_yx ( left ( p_ ), first_, median );
-            if ( ++median != last_ )
-                kd_construct_yx ( right ( p_ ), median, last_ );
+        RandomIt it = median ( first_, last_ );
+        std::nth_element ( first_, it, last_, [] ( value_type const & a, value_type const & b ) { return a.x < b.x; } );
+        *p_ = *it;
+        if ( first_ != it ) {
+            kd_construct_yx ( left ( p_ ), first_, it );
+            if ( ++it != last_ )
+                kd_construct_yx ( right ( p_ ), it, last_ );
         }
     }
     template<typename RandomIt>
     void kd_construct_yx ( pointer const p_, RandomIt const first_, RandomIt const last_ ) noexcept {
-        RandomIt median = detail::median ( first_, last_ );
-        std::nth_element ( first_, median, last_, [] ( value_type const & a, value_type const & b ) { return a.y < b.y; } );
-        *p_ = *median;
-        if ( first_ != median ) {
-            kd_construct_xy ( left ( p_ ), first_, median );
-            if ( ++median != last_ )
-                kd_construct_xy ( right ( p_ ), median, last_ );
+        RandomIt it = median ( first_, last_ );
+        std::nth_element ( first_, it, last_, [] ( value_type const & a, value_type const & b ) { return a.y < b.y; } );
+        *p_ = *it;
+        if ( first_ != it ) {
+            kd_construct_xy ( left ( p_ ), first_, it );
+            if ( ++it != last_ )
+                kd_construct_xy ( right ( p_ ), it, last_ );
         }
     }
 
@@ -208,7 +209,7 @@ struct two_dimensional_tree {
         if constexpr ( std::is_same_v<container_type, array_tag> )
             assert ( il_.size ( ) == StdArraySize );
         if ( il_.size ( ) ) {
-            if ( il_.size ( ) > detail::linear_bound ) {
+            if ( il_.size ( ) > linear_bound ) {
                 if constexpr ( std::is_same_v<container_type, array_tag> )
                     std::fill ( std::begin ( m_data ) + m_data.size ( ) / 2 - 1, std::end ( m_data ), value_type{ } );
                 else
@@ -249,7 +250,7 @@ struct two_dimensional_tree {
     // Returns (constexpr) the size of the std::array, or the class template parameter StdArraySize ( = 0).
     [[nodiscard]] static constexpr std::size_t size ( ) noexcept {
         if constexpr ( std::is_same_v<container_type, array_tag> )
-            return detail::array_size<StdArraySize> ( );
+            return array_size<StdArraySize> ( );
         else
             return StdArraySize;
     }
@@ -295,7 +296,7 @@ struct two_dimensional_tree {
             assert ( std::distance ( first_, last_ ) == StdArraySize );
         if ( first_ < last_ ) {
             auto const n = std::distance ( first_, last_ );
-            if ( n > detail::linear_bound ) {
+            if ( n > linear_bound ) {
                 if constexpr ( std::is_same_v<container_type, array_tag> )
                     std::fill ( std::begin ( m_data ) + m_data.size ( ) / 2 - 1, std::end ( m_data ), value_type{ } );
                 else
@@ -365,7 +366,7 @@ struct two_dimensional_tree {
     template<typename U>
     [[nodiscard]] static constexpr U capacity ( U const i_ ) noexcept {
         assert ( i_ > 0 );
-        return i_ > detail::linear_bound ? sax::next_power_2 ( i_ + 1 ) - 1 : i_;
+        return i_ > linear_bound ? sax::next_power_2 ( i_ + 1 ) - 1 : i_;
     }
 };
 
