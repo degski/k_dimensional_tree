@@ -43,7 +43,7 @@ struct point3 {
 
     value_type x, y, z;
 
-    constexpr point3 ( ) noexcept : x ( std::numeric_limits<Type>::quiet_NaN ( ) ) {}
+    point3 ( ) noexcept : x ( std::numeric_limits<Type>::quiet_NaN ( ) ) {}
     point3 ( point3 const & ) noexcept = default;
     point3 ( point3 && ) noexcept      = default;
     point3 ( value_type && x_ ) noexcept : x{ std::move ( x_ ) } {} // to set the empty-sentinel-value.
