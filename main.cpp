@@ -67,7 +67,7 @@ int main ( ) {
 
     plf::nanotimer timer;
 
-    constexpr int n = 25'000;
+    constexpr int n = 2'500;
 
     std::vector<sax::point2f> points;
 

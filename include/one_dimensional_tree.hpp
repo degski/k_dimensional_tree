@@ -48,6 +48,9 @@ struct point1 {
     point1 ( point1 && ) noexcept      = default;
     point1 ( value_type && x_ ) noexcept : x{ std::move ( x_ ) } {}
 
+    template<typename U>
+    point1 ( U const & other_ ) noexcept : x ( other_.x ), y ( other_.y ) {}
+
     [[maybe_unused]] point1 & operator= ( point1 const & ) noexcept = default;
     [[maybe_unused]] point1 & operator= ( point1 && ) noexcept = default;
 
