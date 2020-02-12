@@ -152,7 +152,7 @@ struct two_dimensional_tree {
         }
         if ( is_leaf ( p_ ) )
             return;
-        if ( ( d = p_->x - m_to.x ) > dist_type{ 0 } ) {
+        if ( ( d = p_->x - m_to.x ) > 0 ) {
             nn_search_yx ( left ( p_ ) );
             if ( ( ( d * d ) < m_min_distance_squared ) )
                 nn_search_yx ( right ( p_ ) );
@@ -171,7 +171,7 @@ struct two_dimensional_tree {
         }
         if ( is_leaf ( p_ ) )
             return;
-        if ( ( d = p_->y - m_to.y ) > dist_type{ 0 } ) {
+        if ( ( d = p_->y - m_to.y ) > 0 ) {
             nn_search_xy ( left ( p_ ) );
             if ( ( ( d * d ) < m_min_distance_squared ) )
                 nn_search_xy ( right ( p_ ) );

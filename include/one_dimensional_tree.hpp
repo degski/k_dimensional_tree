@@ -129,7 +129,7 @@ struct one_dimensional_tree {
         }
         if ( is_leaf ( p_ ) )
             return;
-        if ( ( d = p_->x - m_to.x ) > dist_type{ 0 } ) {
+        if ( ( d = p_->x - m_to.x ) > 0 ) {
             nn_search_x ( left ( p_ ) );
             if ( ( ( d * d ) < m_min_distance_squared ) )
                 nn_search_x ( right ( p_ ) );
