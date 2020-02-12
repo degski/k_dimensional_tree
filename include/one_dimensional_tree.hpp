@@ -79,7 +79,7 @@ using point1f = point1<float>;
 using point1d = point1<double>;
 
 // Implicit KD full binary tree of dimension 2.
-template<typename Type, typename Point = point1<Type>, std::size_t MaxStaticSize = 0, typename TagType = dynamic_tag,
+template<typename Type, std::size_t MaxStaticSize = 0, typename Point = point1<Type>, typename TagType = dynamic_tag,
          typename Allocator = std::allocator<Point>>
 struct one_dimensional_tree {
 
