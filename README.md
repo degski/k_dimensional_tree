@@ -13,7 +13,8 @@ The implementation uses recursion for both construction and nn-search and is str
     using point2f = point2<float>;
     using point2d = point2<double>;
 
-    template<typename Type, typename Point = point2<Type>, typename TagType = static_tag, std::size_t MaxStaticSize = 0>
+    template<typename Type, typename Point = point2<Type>, typename TagType = dynamic_tag, typename Allocator = std::allocator<Point>,
+         std::size_t MaxStaticSize = 0>
     struct two_dimensional_tree;
 
 
