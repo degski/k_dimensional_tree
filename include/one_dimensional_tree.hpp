@@ -182,7 +182,7 @@ struct one_dimensional_tree {
         auto const n = std::distance ( first_, last_ );
         if ( n ) {
             if ( n > detail::linear_bound ) {
-                m_data.resize ( capacity ( static_cast<std::size_t> ( n ) ) );
+                m_data.resize ( detail::capacity ( static_cast<std::size_t> ( n ) ) );
                 m_leaf_start = detail::median_ptr ( m_data.data ( ), m_data.size ( ) );
                 kd_construct_x ( m_data.data ( ), first_, last_ );
                 nn_search = &one_dimensional_tree::nn_search_x;
@@ -257,13 +257,6 @@ struct one_dimensional_tree {
         for ( auto const & p : tree_.m_data )
             out_ << p;
         return out_;
-    }
-
-    private:
-    template<typename U>
-    [[nodiscard]] static constexpr U capacity ( U const i_ ) noexcept {
-        assert ( i_ > 0 );
-        return i_ > detail::linear_bound ? sax::next_power_2 ( i_ + 1 ) - 1 : i_;
     }
 };
 
