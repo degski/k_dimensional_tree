@@ -85,8 +85,8 @@ using point3f = point3<float>;
 using point3d = point3<double>;
 
 // Implicit KD full binary tree of dimension 3.
-template<typename Type, typename Point = point3<Type>, typename TagType = dynamic_tag, typename Allocator = std::allocator<Point>,
-         std::size_t MaxStaticSize = 0>
+template<typename Type, typename Point = point3<Type>, std::size_t MaxStaticSize = 0, typename TagType = dynamic_tag,
+         typename Allocator = std::allocator<Point>>
 struct three_dimensional_tree {
 
     using value_type = Point;
