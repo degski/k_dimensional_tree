@@ -33,6 +33,7 @@
 #include <map>
 #include <random>
 #include <sax/iostream.hpp>
+#include <span>
 #include <static_vector>
 #include <string>
 #include <type_traits>
