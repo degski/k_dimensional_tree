@@ -25,8 +25,4 @@ Other than default construction, there is no other way to populate the tree than
 
 ### IDEAS:
 
-- restrict iterator types correctly with sfinae and `constexpr`
-
 ### TODO:
-
-- disable `detail::median_it` for the wrong `ForwardIt`-parameter
